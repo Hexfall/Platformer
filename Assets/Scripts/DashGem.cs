@@ -30,7 +30,7 @@ namespace AGDDPlatformer
                 return;
 
             PlayerController playerController = other.GetComponentInParent<PlayerController>();
-            if (playerController != null)
+            if (playerController != null && !playerController.CanDash())
             {
                 playerController.ResetDash();
                 isActive = false;

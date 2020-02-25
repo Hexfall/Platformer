@@ -52,6 +52,11 @@ namespace AGDDPlatformer
             defaultGravityModifier = gravityModifier;
         }
 
+        public bool CanDash()
+        {
+            return canDash;
+        }
+
         void Update()
         {
             isFrozen = GameManager.instance.timeStopped;
@@ -66,7 +71,7 @@ namespace AGDDPlatformer
 
             move.y = Input.GetAxisRaw("Vertical");
 
-            if (Input.GetButtonDown("Jump"))
+            if (Input.GetButtonDown("Jump") && canJump)
             {
                 // Store jump time so that we can buffer the input
                 lastJumpTime = Time.time;
@@ -85,9 +90,10 @@ namespace AGDDPlatformer
             {
                 // Dash in facing direction if there is no directional input;
                 //desiredDashDirection = spriteRenderer.flipX ? -Vector2.right : Vector2.right;
-                desiredDashDirection = Vector2.up * ((gravityModifier < 0) ? -1 : 1);
+                // Default dash direction is (relative) up.
+                desiredDashDirection = Vector2.up * (gravityModifier < 0 ? -1 : 1);
             }
-            desiredDashDirection = desiredDashDirection.normalized;
+            //desiredDashDirection = desiredDashDirection.normalized;
             // If player is attempting to jump mid-air, dash.
             if (Input.GetButtonDown("Jump") && !canJump)
             {
