@@ -296,7 +296,7 @@ PrefabInstance:
     - target: {fileID: 2653386272220273286, guid: 1d096467bd11505479937aff780e5cd2,
         type: 3}
       propertyPath: gravityModifier
-      value: 0.75
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 4691332085472185387, guid: 1d096467bd11505479937aff780e5cd2,
         type: 3}
@@ -347,6 +347,11 @@ PrefabInstance:
         type: 3}
       propertyPath: targets.Array.size
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4691332085998625991, guid: 1d096467bd11505479937aff780e5cd2,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4691332086094480774, guid: 1d096467bd11505479937aff780e5cd2,
         type: 3}
@@ -119555,7 +119560,8 @@ Tilemap:
   - m_RefCount: 0
     m_Data: {r: NaN, g: NaN, b: NaN, a: NaN}
   - m_RefCount: 0
-    m_Data: {r: 1.9156e-41, g: 1.9156e-41, b: 1.9156e-41, a: 1.9156e-41}
+    m_Data: {r: 0.0000000016213306, g: 0.0000000016213306, b: 0.0000000016213306,
+      a: 0.0000000016213306}
   - m_RefCount: 13242
     m_Data: {r: 0.2735849, g: 0.2735849, b: 0.2735849, a: 1}
   m_TileObjectToInstantiateArray: []
