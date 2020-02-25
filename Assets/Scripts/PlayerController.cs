@@ -84,10 +84,12 @@ namespace AGDDPlatformer
             if (desiredDashDirection == Vector2.zero)
             {
                 // Dash in facing direction if there is no directional input;
-                desiredDashDirection = spriteRenderer.flipX ? -Vector2.right : Vector2.right;
+                //desiredDashDirection = spriteRenderer.flipX ? -Vector2.right : Vector2.right;
+                desiredDashDirection = Vector2.up * ((gravityModifier < 0) ? -1 : 1);
             }
             desiredDashDirection = desiredDashDirection.normalized;
-            if (Input.GetButtonDown("Dash"))
+            // If player is attempting to jump mid-air, dash.
+            if (Input.GetButtonDown("Jump") && !canJump)
             {
                 wantsToDash = true;
             }
