@@ -195,5 +195,17 @@ namespace AGDDPlatformer
         {
             canDash = true;
         }
+
+        public void Stick()
+        {
+            gravityModifier = 0;
+            velocity = Vector2.zero;
+            canJump = false;
+        }
+
+        public void Unstick()
+        {
+            gravityModifier = defaultGravityModifier;
+        }
     }
 }
