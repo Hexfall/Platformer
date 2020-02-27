@@ -11,6 +11,11 @@ namespace AGDDPlatformer
         public float cayoteTime = 0.1f; // Lets player jump just after leaving ground
         public float jumpBufferTime = 0.1f; // Lets the player input a jump just before becoming grounded
 
+        [Header("Death")]
+        public float respawnTime = 2.0f;
+        float deathTime;
+        bool isDead = false;
+
         [Header("Dash")]
         public float dashSpeed;
         public float dashTime;
@@ -59,6 +64,13 @@ namespace AGDDPlatformer
 
         void Update()
         {
+            if (isDead)
+            {
+                if (deathTime + respawnTime <= Time.time)
+                    ResetPlayer();
+                return;
+            }
+
             isFrozen = GameManager.instance.timeStopped;
 
             /* --- Read Input --- */
@@ -189,6 +201,8 @@ namespace AGDDPlatformer
             lastJumpTime = -jumpBufferTime * 2;
 
             velocity = Vector2.zero;
+            isDead = false;
+            Unstick();
         }
 
         public void ResetDash()
@@ -206,6 +220,13 @@ namespace AGDDPlatformer
         public void Unstick()
         {
             gravityModifier = defaultGravityModifier;
+        }
+
+        public void Kill()
+        {
+            isDead = true;
+            deathTime = Time.time;
+            Stick();
         }
     }
 }
