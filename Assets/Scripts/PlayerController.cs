@@ -10,11 +10,13 @@ namespace AGDDPlatformer
         public float jumpDeceleration = 0.5f; // Upwards slow after releasing jump button
         public float cayoteTime = 0.1f; // Lets player jump just after leaving ground
         public float jumpBufferTime = 0.1f; // Lets the player input a jump just before becoming grounded
+        public float terminalVelocity = 2;
 
         [Header("Death")]
         public float respawnTime = 2.0f;
         float deathTime;
         bool isDead = false;
+        public float KillY;
 
         [Header("Dash")]
         public float dashSpeed;
@@ -42,8 +44,11 @@ namespace AGDDPlatformer
         bool jumpReleased;
         Vector2 move;
         float defaultGravityModifier;
+        bool isStuck = false;
 
         SpriteRenderer spriteRenderer;
+
+        float overrideGravity;
 
         void Awake()
         {
@@ -55,6 +60,7 @@ namespace AGDDPlatformer
             startOrientation = spriteRenderer.flipX;
 
             defaultGravityModifier = gravityModifier;
+            overrideGravity = defaultGravityModifier;
         }
 
         public bool CanDash()
@@ -71,19 +77,25 @@ namespace AGDDPlatformer
                 return;
             }
 
+            if (transform.position.y <= KillY)
+                Kill();
+
             isFrozen = GameManager.instance.timeStopped;
 
             /* --- Read Input --- */
 
             move.x = Input.GetAxisRaw("Horizontal");
-            if (gravityModifier < 0)
-            {
-                move.x *= -1;
-            }
+            //if (gravityModifier < 0)
+            //{
+            //    move.x *= -1;
+            //}
 
             move.y = Input.GetAxisRaw("Vertical");
 
-            if (Input.GetButtonDown("Jump") && canJump)
+            if (!isDashing && Mathf.Abs(velocity.y) > terminalVelocity)
+                velocity.y = Mathf.Sign(velocity.y) * terminalVelocity;
+
+            if (Input.GetButtonDown("Jump"))
             {
                 // Store jump time so that we can buffer the input
                 lastJumpTime = Time.time;
@@ -107,7 +119,7 @@ namespace AGDDPlatformer
             }
             //desiredDashDirection = desiredDashDirection.normalized;
             // If player is attempting to jump mid-air, dash.
-            if (Input.GetButtonDown("Jump") && !canJump)
+            if (Input.GetButtonDown("Jump") && (!isGrounded || isStuck))
             {
                 wantsToDash = true;
             }
@@ -120,7 +132,8 @@ namespace AGDDPlatformer
                 dashDirection = desiredDashDirection;
                 lastDashTime = Time.time;
                 canDash = false;
-                gravityModifier = 0;
+                SetGravity(0);
+                Unstick();
 
                 source.PlayOneShot(dashSound);
             }
@@ -133,7 +146,7 @@ namespace AGDDPlatformer
                 {
                     isDashing = false;
                     
-                    gravityModifier = defaultGravityModifier;
+                    ResetGravity();
                     if ((gravityModifier >= 0 && velocity.y > 0) ||
                         (gravityModifier < 0 && velocity.y < 0))
                     {
@@ -156,7 +169,7 @@ namespace AGDDPlatformer
                 float timeSinceJumpInput = Time.time - lastJumpTime;
                 float timeSinceLastGrounded = Time.time - lastGroundedTime;
 
-                if (canJump && timeSinceJumpInput <= jumpBufferTime && timeSinceLastGrounded <= cayoteTime)
+                if (canJump && timeSinceJumpInput <= jumpBufferTime && timeSinceLastGrounded <= cayoteTime && !isStuck)
                 {
                     velocity.y = Mathf.Sign(gravityModifier) * jumpSpeed;
                     canJump = false;
@@ -175,7 +188,7 @@ namespace AGDDPlatformer
                     jumpReleased = false;
                 }
 
-                velocity.x = move.x * maxSpeed;
+                if (!IsStuck()) velocity.x = move.x * maxSpeed;
             }
 
             /* --- Adjust Sprite --- */
@@ -191,6 +204,7 @@ namespace AGDDPlatformer
             }
 
             spriteRenderer.color = canDash ? canDashColor : cantDashColor;
+            if (IsStuck()) velocity = Vector2.zero;
         }
 
         public void ResetPlayer()
@@ -212,14 +226,22 @@ namespace AGDDPlatformer
 
         public void Stick()
         {
-            gravityModifier = 0;
+            SetGravity(0);
             velocity = Vector2.zero;
             canJump = false;
+            isDashing = false;
+            isStuck = true;
         }
 
         public void Unstick()
         {
-            gravityModifier = defaultGravityModifier;
+            ResetGravity();
+            isStuck = false;
+        }
+
+        public bool IsStuck()
+        {
+            return isStuck && Input.GetButton("Stick");
         }
 
         public void Kill()
@@ -227,6 +249,33 @@ namespace AGDDPlatformer
             isDead = true;
             deathTime = Time.time;
             Stick();
+        }
+
+        public void SetGravity(float value)
+        {
+            gravityModifier = value;
+        }
+
+        public void ResetGravity()
+        {
+            SetGravity(overrideGravity);
+        }
+
+        public void ResetGravityHard()
+        {
+            overrideGravity = defaultGravityModifier;
+            ResetGravity();
+        }
+
+        public void SetGravityHard(float value)
+        {
+            overrideGravity = value;
+            ResetGravity();
+        }
+
+        public bool MovingAgainstGravity()
+        {
+            return (Mathf.Sign(gravityModifier) != Mathf.Sign(velocity.y));
         }
     }
 }
